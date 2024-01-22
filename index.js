@@ -24,8 +24,25 @@ async function run() {
     await client.connect();
 
     const menuCollection = client.db("restaurantDB").collection("menu");
+    const usersCollection = client.db("restaurantDB").collection("users");
     const reviewsCollection = client.db("restaurantDB").collection("reviews");
     const cartCollection = client.db("restaurantDB").collection("cart");
+
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists" });
+      }
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
 
     app.get("/menu", async (req, res) => {
       const result = await menuCollection.find().toArray();
